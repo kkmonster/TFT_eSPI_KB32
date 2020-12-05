@@ -1,6 +1,6 @@
 # TFT_eSPI core library
 
-TFT_eSPI	KEYWORD1
+TFT_eSPI_KB32	KEYWORD1
 
 begin	KEYWORD2
 init	KEYWORD2
@@ -109,65 +109,9 @@ getAttribute	KEYWORD2
 getSetup	KEYWORD2
 getSPIinstance	KEYWORD2
 
-
-# Touch functions
-
-getTouchRaw	KEYWORD2
-getTouchRawZ	KEYWORD2
-convertRawXY	KEYWORD2
-getTouch	KEYWORD2
-calibrateTouch	KEYWORD2
-setTouch	KEYWORD2
-
-
 # Smooth font functions
 
 loadFont	KEYWORD2
 unloadFont	KEYWORD2
 getUnicodeIndex	KEYWORD2
 showFont	KEYWORD2
-
-
-# Button class
-
-TFT_eSPI_Button	KEYWORD1
-
-initButton	KEYWORD2
-initButtonUL	KEYWORD2
-setLabelDatum	KEYWORD2
-drawButton	KEYWORD2
-contains	KEYWORD2
-press	KEYWORD2
-isPressed	KEYWORD2
-justPressed	KEYWORD2
-justReleased	KEYWORD2
-
-
-# Sprite class
-
-TFT_eSprite	KEYWORD1
-
-createSprite	KEYWORD2
-getPointer	KEYWORD2
-created	KEYWORD2
-deleteSprite	KEYWORD2
-frameBuffer	KEYWORD2
-setColorDepth	KEYWORD2
-getColorDepth	KEYWORD2
-createPalette	KEYWORD2
-setPaletteColor	KEYWORD2
-getPaletteColor	KEYWORD2
-setBitmapColor	KEYWORD2
-fillSprite	KEYWORD2
-setScrollRect	KEYWORD2
-scroll	KEYWORD2
-pushRotated	KEYWORD2
-setPivot	KEYWORD2
-getPivotX	KEYWORD2
-getPivotY	KEYWORD2
-getRotatedBounds	KEYWORD2
-readPixelValue	KEYWORD2
-pushToSprite	KEYWORD2
-drawGlyph	KEYWORD2
-printToSprite	KEYWORD2
-pushSprite	KEYWORD2
