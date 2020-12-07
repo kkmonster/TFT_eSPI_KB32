@@ -3,9 +3,9 @@
 #define MIC_pin 35 // IN4
 
 #define INTERVAL_Hz 2500.0f
-#define FFT_N 512 // Must be a power of 2
+#define FFT_N 128 // Must be a power of 2
 #define TOTAL_TIME ((float)FFT_N/INTERVAL_Hz) //The time in which data was captured. This is equal to FFT_N/sampling_freq
-#define SOUND_THRESHOLD 0.033f
+#define SOUND_THRESHOLD 0.030f
 
 
 #include <arduino.h>
@@ -87,7 +87,7 @@ void loop() {
         sound_mag = abs(readMic() - backgroundSound);
 
     // Serial.println(sound_mag);
-
+    delay(10);
     while (fft_input_index < FFT_N) {
 
         if (micros() - time_interval >= (1000000L / INTERVAL_Hz)) {
@@ -113,8 +113,18 @@ void loop() {
         for (int k = 1; k < real_fft_plan->size / 2; k++)
         {
             /*The real part of a magnitude at a frequency is followed by the corresponding imaginary part in the output*/
-            float mag = sqrt(pow(real_fft_plan->output[2 * k], 2) + pow(real_fft_plan->output[2 * k + 1], 2)) / 1;
+            float mag = 10 * sqrt(pow(real_fft_plan->output[2 * k], 2) + pow(real_fft_plan->output[2 * k + 1], 2)) / 1;
             float freq = k * 1.0 / TOTAL_TIME;
+
+
+
+
+            sprintf(print_buf, "%f", mag);
+            Serial.print(print_buf);
+
+            if (k + 1 < real_fft_plan->size / 2)
+                Serial.print(",");
+
 
             //    sprintf(print_buf,"%f Hz : %f", freq, mag);
             //    Serial.println(print_buf);
@@ -132,22 +142,16 @@ void loop() {
                     tft.drawFastHLine(0, y + 1, 159, TFT_WHITE);
 
                 if (x < 160) {
-                    tft.drawPixel(x, y, mag_2_color(mag * 150));
+                    tft.drawPixel(2 * x, y, mag_2_color(mag * 15));
+                    tft.drawPixel(2 * x + 1, y, mag_2_color(mag * 15));
                     x++;
                 }
             }
             else {
                 y = 0;
-                if (x < 160) {
-                    tft.drawFastVLine(x, 0, 80 - (mag * 100), TFT_BLACK);
-                    tft.drawFastVLine(x, 80 - (mag * 100) + 1, (mag * 100), mag_2_color(mag * 150));
-
-
-                    sprintf(print_buf, "%f", mag);
-                    Serial.print(print_buf);
-                    if (x + 1 < 160) 
-                        Serial.print(",");
-                
+                if (x * 2 < 160) {
+                    tft.fillRect(x * 2, 0, 2, 80 - (mag * 10), TFT_BLACK);
+                    tft.fillRect(x * 2, 80 - (mag * 10) + 1, 2, (mag * 10), mag_2_color(mag * 15));
                     x++;
                 }
             }
@@ -178,7 +182,7 @@ void loop() {
         // Serial.print("Time taken: ");
         // Serial.print((t2 - t1) * 1.0 / 1000);
         // Serial.println(" milliseconds!\n\n\n");
-
+        delay(600);
     }
 
 }

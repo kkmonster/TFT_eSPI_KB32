@@ -3,10 +3,10 @@
 #define MIC_pin 35 // IN4
 
 #define INTERVAL_Hz 2500.0f
-#define FFT_N 512 // Must be a power of 2
+#define FFT_N 128 // Must be a power of 2
 #define TOTAL_TIME ((float)FFT_N/INTERVAL_Hz) //The time in which data was captured. This is equal to FFT_N/sampling_freq
-#define SOUND_THRESHOLD 0.033f
-#define features_N 160 
+#define SOUND_THRESHOLD 0.030f
+
 
 
 #include <arduino.h>
@@ -14,12 +14,11 @@
 #include <TFT_eSPI_KB32.h> // Hardware-specific library
 #include "colormap.h" // include the library
 
-
 #include <EloquentTinyML.h>
 #include "model.h" // include the library
-#define NUMBER_OF_INPUTS 160
+#define NUMBER_OF_INPUTS 63
 #define NUMBER_OF_OUTPUTS 10
-#define TENSOR_ARENA_SIZE 80*1024
+#define TENSOR_ARENA_SIZE 50*1024
 
 Eloquent::TinyML::TfLite<NUMBER_OF_INPUTS, NUMBER_OF_OUTPUTS, TENSOR_ARENA_SIZE> ml;
 
@@ -41,11 +40,11 @@ TFT_eSPI_KB32 tft = TFT_eSPI_KB32();
 
 float fft_input[FFT_N];
 float fft_output[FFT_N];
-float features[features_N];
+float features[NUMBER_OF_INPUTS];
 float max_magnitude = 0;
 float fundamental_freq = 0;
 float backgroundSound = 0;
-
+uint8_t last_index = 0;
 uint32_t time_interval = 0;
 uint16_t fft_input_index = 0;
 uint16_t x, y;
@@ -115,7 +114,7 @@ void loop() {
         sound_mag = abs(readMic() - backgroundSound);
 
     // Serial.println(sound_mag);
-
+    delay(10);
     while (fft_input_index < FFT_N) {
 
         if (micros() - time_interval >= (1000000L / INTERVAL_Hz)) {
@@ -125,6 +124,11 @@ void loop() {
             fft_input_index++;
         }
     }
+
+    // tft.init();   // initialize a ST7735S chip
+    // tft.fillScreen(TFT_BLACK);
+    // tft.Set_brightness(16); // 0-16 level
+    // tft.setTextColor(TFT_ORANGE);
 
     if (fft_input_index == FFT_N) {
         fft_input_index = 0;
@@ -141,11 +145,11 @@ void loop() {
         for (int k = 1; k < real_fft_plan->size / 2; k++)
         {
             /*The real part of a magnitude at a frequency is followed by the corresponding imaginary part in the output*/
-            float mag = sqrt(pow(real_fft_plan->output[2 * k], 2) + pow(real_fft_plan->output[2 * k + 1], 2)) / 1;
+            float mag = 10 * sqrt(pow(real_fft_plan->output[2 * k], 2) + pow(real_fft_plan->output[2 * k + 1], 2)) / 1;
             float freq = k * 1.0 / TOTAL_TIME;
 
-            if (k < 160)
-                features[k] = mag;
+
+            features[k - 1] = mag;
 
             //    sprintf(print_buf,"%f Hz : %f", freq, mag);
             //    Serial.println(print_buf);
@@ -171,19 +175,19 @@ void loop() {
                     tft.drawFastHLine(0, y + 1, 159, TFT_WHITE);
 
                 if (x < 160) {
-                    tft.drawPixel(x, y, mag_2_color(mag * 150));
+                    tft.drawPixel(2 * x, y, mag_2_color(mag * 15));
+                    tft.drawPixel(2 * x + 1, y, mag_2_color(mag * 15));
                     x++;
                 }
             }
             else {
                 y = 0;
-                if (x < 160) {
-                    tft.drawFastVLine(x, 0, 80 - (mag * 100), TFT_BLACK);
-                    tft.drawFastVLine(x, 80 - (mag * 100) + 1, (mag * 100), mag_2_color(mag * 150));
+                if (x * 2 < 160) {
+                    tft.fillRect(x * 2, 0, 2, 80 - (mag * 10), TFT_BLACK);
+                    tft.fillRect(x * 2, 80 - (mag * 10) + 1, 2, (mag * 10), mag_2_color(mag * 15));
                     x++;
                 }
             }
-
         }
         y++;
         if (y >= 80)
@@ -215,15 +219,29 @@ void loop() {
             Serial.print(i == 9 ? '\n' : ',');
         }
 
+        float percent_max = 0;
+        uint8_t label_index = 0;
 
         for (int i = 0; i < 10; i++) {
-            if (y_pred[i] >= 0.4) {
-                Serial.print("ฃืWord detected: ");
-                Serial.println(label[i]);
-                Serial.println("");
+            if (y_pred[i] > percent_max) {
+                percent_max = y_pred[i];
+                label_index = i;
             }
         }
 
+        if (percent_max >= 0.4) {
+
+            Serial.print("\nWord detected: ");
+            Serial.println(label[label_index]);
+            Serial.println("");
+            tft.setTextColor(TFT_BLACK);
+            tft.drawCentreString(String(label[last_index]), 140, 20, 6);
+
+            tft.setTextColor(TFT_ORANGE);
+            tft.drawCentreString(String(label[label_index]), 140, 20, 6);
+            last_index = label_index;
+            delay(100);
+        }
 
         // /*Multiply the magnitude of the DC component with (1/FFT_N) to obtain the DC component*/
         // sprintf(print_buf, "DC component : %f V\n", (real_fft_plan->output[0]) / FFT_N);  // DC is at [0]
