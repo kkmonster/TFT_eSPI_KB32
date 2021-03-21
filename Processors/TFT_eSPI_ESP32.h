@@ -53,16 +53,16 @@
 // Define the DC (TFT Data/Command or Register Select (RS))pin drive code
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#define DC_C delayMicroseconds(2);GPIO.out1_w1tc.val = (1 << (TFT_DC - 32));delayMicroseconds(2)//;GPIO.out1_w1tc.val = (1 << (TFT_DC - 32))
-#define DC_D delayMicroseconds(2);GPIO.out1_w1ts.val = (1 << (TFT_DC - 32));delayMicroseconds(2)//;GPIO.out1_w1ts.val = (1 << (TFT_DC - 32))
+#define DC_C delayMicroseconds(4);GPIO.out1_w1tc.val = (1 << (TFT_DC - 32));delayMicroseconds(4)//;GPIO.out1_w1tc.val = (1 << (TFT_DC - 32))
+#define DC_D delayMicroseconds(4);GPIO.out1_w1ts.val = (1 << (TFT_DC - 32));delayMicroseconds(4)//;GPIO.out1_w1ts.val = (1 << (TFT_DC - 32))
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Define the CS (TFT chip select) pin drive code
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#define CS_L delayMicroseconds(2);GPIO.out1_w1tc.val = (1 << (TFT_CS - 32));delayMicroseconds(2)//; GPIO.out1_w1tc.val = (1 << (TFT_CS - 32))
-#define CS_H delayMicroseconds(2);GPIO.out1_w1ts.val = (1 << (TFT_CS - 32));delayMicroseconds(2)//;GPIO.out1_w1ts.val = (1 << (TFT_CS - 32))
+#define CS_L delayMicroseconds(4);GPIO.out1_w1tc.val = (1 << (TFT_CS - 32));delayMicroseconds(4)//; GPIO.out1_w1tc.val = (1 << (TFT_CS - 32))
+#define CS_H delayMicroseconds(4);GPIO.out1_w1ts.val = (1 << (TFT_CS - 32));delayMicroseconds(4)//;GPIO.out1_w1ts.val = (1 << (TFT_CS - 32))
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
